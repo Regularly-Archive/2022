@@ -1,0 +1,41 @@
+version: '3'
+services:
+  envoy_gateway:
+    build: Envoy/
+    ports:
+      - "9090:9090"
+      - "9091:9091"
+    volumes:
+      - ./Envoy/envoy.yaml:/etc/envoy/envoy.yaml
+      - "./Envoy/logs/:/etc/envoy/logs/"
+  order_service:
+    build: OrderService/
+    ports:
+      - "8084:80"
+    environment:
+      ASPNETCORE_URLS: "http://+"
+      ASPNETCORE_ENVIRONMENT: "Development"
+      SERVICE_NAME: "OrderService"
+  payment_service:
+    build: PaymentService/
+    ports:
+      - "8082:80"
+    environment:
+      ASPNETCORE_URLS: "http://+"
+      ASPNETCORE_ENVIRONMENT: "Development"
+      SERVICE_NAME: "PaymentService"
+  echo_service:
+    build: EchoService/
+    ports:
+      - "8083:8083"
+    environment:
+      ASPNETCORE_URLS: "http://+"
+      ASPNETCORE_ENVIRONMENT: "Development"
+      SERVICE_NAME: "EchoService"
+  jaeger:
+    image: jaegertracing/all-in-one
+    environment:
+    - COLLECTOR_ZIPKIN_HOST_PORT=9411
+    ports:
+    - "9411:9411"
+    - "16686:16686"
