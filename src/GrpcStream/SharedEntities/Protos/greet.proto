@@ -1,0 +1,30 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "SharedEntities";
+
+package pingpong;
+
+service HeartBeatService {
+  
+  // 普通 RPC
+  // Task<PingReply> SimplePing(PingRequest request, ServerCallContext context)
+  rpc SimplePing(PingRequest) returns (PingReply);
+
+  // 客户端流式 RPC
+  rpc ClientStreamPing(stream PingRequest) returns (PingReply);
+
+  // 服务端流式 RPC
+  rpc ServerStreamPing(PingRequest) returns (stream PingReply);
+
+  // 双向流式 RPC
+  rpc BothStreamPing(stream PingRequest) returns (stream PingReply);
+}
+
+message PingRequest {
+  string RequestId = 1;
+}
+
+message PingReply {
+  string RequestId = 1;
+  string Message = 2;
+}
