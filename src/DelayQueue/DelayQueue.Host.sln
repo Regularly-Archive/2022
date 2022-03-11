@@ -1,0 +1,55 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32126.317
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DelayQueue.Host", "DelayQueue.Host\DelayQueue.Host.csproj", "{AAACF954-4ABF-41DC-A817-6320EB667BD4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DelayQueue.Quartz", "DelayQueue.Quartz\DelayQueue.Quartz.csproj", "{8DFCA07D-2BF3-4445-B874-349124A90BAA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DelayQueue.Shared", "DelayQueue.Shared\DelayQueue.Shared.csproj", "{12AE2931-17D7-4147-8502-B4DA49950F9D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DelayQueue.Redis", "DelayQueue.Redis\DelayQueue.Redis.csproj", "{2C6E9ACF-9F9E-46F3-ADB8-A17DE7A22136}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DelayQueue.Structure", "DelayQueue.Structure\DelayQueue.Structure.csproj", "{39FF524F-517B-429B-B5A9-6FC5E273C084}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DelayQueue.RabbitMQ", "DelayQueue.RabbitMQ\DelayQueue.RabbitMQ.csproj", "{FEF9100F-FBB4-4840-80CF-2857210DE98F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AAACF954-4ABF-41DC-A817-6320EB667BD4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AAACF954-4ABF-41DC-A817-6320EB667BD4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AAACF954-4ABF-41DC-A817-6320EB667BD4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AAACF954-4ABF-41DC-A817-6320EB667BD4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8DFCA07D-2BF3-4445-B874-349124A90BAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8DFCA07D-2BF3-4445-B874-349124A90BAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8DFCA07D-2BF3-4445-B874-349124A90BAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8DFCA07D-2BF3-4445-B874-349124A90BAA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{12AE2931-17D7-4147-8502-B4DA49950F9D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{12AE2931-17D7-4147-8502-B4DA49950F9D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{12AE2931-17D7-4147-8502-B4DA49950F9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{12AE2931-17D7-4147-8502-B4DA49950F9D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2C6E9ACF-9F9E-46F3-ADB8-A17DE7A22136}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2C6E9ACF-9F9E-46F3-ADB8-A17DE7A22136}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2C6E9ACF-9F9E-46F3-ADB8-A17DE7A22136}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2C6E9ACF-9F9E-46F3-ADB8-A17DE7A22136}.Release|Any CPU.Build.0 = Release|Any CPU
+		{39FF524F-517B-429B-B5A9-6FC5E273C084}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{39FF524F-517B-429B-B5A9-6FC5E273C084}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{39FF524F-517B-429B-B5A9-6FC5E273C084}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{39FF524F-517B-429B-B5A9-6FC5E273C084}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FEF9100F-FBB4-4840-80CF-2857210DE98F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FEF9100F-FBB4-4840-80CF-2857210DE98F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FEF9100F-FBB4-4840-80CF-2857210DE98F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FEF9100F-FBB4-4840-80CF-2857210DE98F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4E401337-A3CE-46DE-B3D3-55537F21C7D6}
+	EndGlobalSection
+EndGlobal
