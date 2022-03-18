@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using SharedEntities;
 using Newtonsoft.Json;
 using Microsoft.Extensions.DependencyInjection;
+using System.IO;
 
 namespace GrpcStream
 {
@@ -14,35 +15,47 @@ namespace GrpcStream
         {
             AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 
-            Console.WriteLine("请输入功能选项：\r\n1. 普通 gRPC\r\n2. 客户端流式 gRPC\r\n3. 服务端流式 gRPC\r\n4. 双向流流式 gRPC\r\n按Q退出");
+            Console.WriteLine("请输入功能选项：\r\n1. 普通 gRPC\r\n2. 客户端流式 gRPC\r\n3. 服务端流式 gRPC\r\n4. 双向流流式 gRPC\r\n5. 文件上传\r\n6. 文件下载\r\n按Q退出");
 
             var services = new ServiceCollection();
             services.AddGrpcClient<HeartBeatService.HeartBeatServiceClient>(client => client.Address = new Uri("http://localhost:5000"));
+            services.AddGrpcClient<FileService.FileServiceClient>(client =>
+            {
+                client.Address = new Uri("http://localhost:5000");
+
+            });
 
             var serviceProvider = services.BuildServiceProvider();
             var heartBeatClient = serviceProvider.GetRequiredService<HeartBeatService.HeartBeatServiceClient>();
 
-            var input = Console.ReadLine();
-            while (input != null && Console.ReadKey().Key != ConsoleKey.Q)
+            var channel = GrpcChannel.ForAddress("http://localhost:5000", new GrpcChannelOptions
             {
-                switch (input)
+                MaxReceiveMessageSize = null, // 10 MB
+                MaxSendMessageSize = null // 10 MB
+            });
+            var fileServiceClient = new FileService.FileServiceClient(channel);
+
+            var input = Console.ReadKey();
+            while (Console.ReadKey().Key != ConsoleKey.Q)
+            {
+                switch (input.Key)
                 {
-                    case "1":
+                    case ConsoleKey.D1:
                         var reply1 = heartBeatClient.SimplePingAsync(new PingRequest() { RequestId = GetCurrentTimeStamp().ToString() });
                         Console.WriteLine($"{JsonConvert.SerializeObject(reply1)}");
                         break;
-                    case "2":
+                    case ConsoleKey.D2:
                         var callResult2 = heartBeatClient.ClientStreamPing();
                         await callResult2.RequestStream.WriteAsync(new PingRequest() { RequestId = GetCurrentTimeStamp().ToString() });
                         await callResult2.RequestStream.CompleteAsync();
                         var reply2 = await callResult2.ResponseAsync;
                         Console.WriteLine($"{JsonConvert.SerializeObject(reply2)}");
                         break;
-                    case "3":
+                    case ConsoleKey.D3:
                         var reply3 = heartBeatClient.ServerStreamPing(new PingRequest() { RequestId = GetCurrentTimeStamp().ToString() });
                         Console.WriteLine($"{JsonConvert.SerializeObject(reply3)}");
                         break;
-                    case "4":
+                    case ConsoleKey.D4:
                         var callResult4 = heartBeatClient.BothStreamPing();
 
                         for (var i = 0; i < 10; i++)
@@ -62,9 +75,31 @@ namespace GrpcStream
                             Console.WriteLine($"O => {JsonConvert.SerializeObject(reply4)}");
                         }
                         break;
+                    case ConsoleKey.D5:
+                        var uploadResult = fileServiceClient.UploadFile();
+                        var uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "ACRouge.png");
+                        var content = Google.Protobuf.ByteString.CopyFrom(File.ReadAllBytes(uploadPath));
+                        var uploadRequest = new UploadFileRequest() { FileName = "ACRouge.png", Content = content };
+                        await uploadResult.RequestStream.WriteAsync(uploadRequest);
+                        await uploadResult.RequestStream.CompleteAsync();
+
+                        var reply = await uploadResult.ResponseAsync;
+                        Console.WriteLine($"File Uploaded to /{reply.FilePath}");
+
+                        break;
+                    case ConsoleKey.D6:
+                        var downloadRequest = new DownloadFileRequest() { FilePath = "228784a3-4e1f-42ab-9fe1-fa3d42278ada.png" };
+                        var downloadResult = fileServiceClient.DownloadFile(downloadRequest);
+                        var downloadPath = Path.Combine(Directory.GetCurrentDirectory(), downloadRequest.FilePath);
+                        while (await downloadResult.ResponseStream.MoveNext(CancellationToken.None))
+                        {
+                            await File.WriteAllBytesAsync(downloadPath, downloadResult.ResponseStream.Current.Content.ToByteArray());
+                        }
+                        Console.WriteLine($"File Downloaded to {downloadPath}");
+                        break;
                 }
 
-                input = Console.ReadLine();
+                input = Console.ReadKey();
             }
         }
 

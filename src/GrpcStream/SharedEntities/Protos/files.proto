@@ -1,0 +1,27 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "SharedEntities";
+
+package pingpong;
+
+service FileService {
+  rpc UploadFile(stream UploadFileRequest) returns (UploadFileResponse);
+  rpc DownloadFile(DownloadFileRequest) returns (stream DownloadFileResponse);
+}
+
+message UploadFileRequest {
+  string FileName = 1;
+  bytes Content = 2;
+}
+
+message UploadFileResponse {
+  string FilePath = 1;
+}
+
+message DownloadFileRequest {
+  string FilePath = 1;
+}
+
+message DownloadFileResponse {
+  bytes Content = 1;
+}
