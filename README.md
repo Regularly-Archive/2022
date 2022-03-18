@@ -1,7 +1,9 @@
 # 2022
 Non-formal Project of 2022
 
-* [ASP.NET Core + Envoy 实现分布式追踪](https://github.com/Regularly-Archive/2022/tree/master/src/EnvoyTrace) 
-* [gRPC 流式传输示例](https://github.com/Regularly-Archive/2022/tree/master/src/GrpcStream) 
+* [ASP.NET Core + Envoy 瀹炵幇鍒嗗竷寮忚拷韪猐(https://github.com/Regularly-Archive/2022/tree/master/src/EnvoyTrace) 
+* [gRPC 娴佸紡浼犺緭绀轰緥](https://github.com/Regularly-Archive/2022/tree/master/src/GrpcStream) 
+* [寤惰繜闃熷垪甯歌鐨勫疄鐜版柟妗圿(https://github.com/Regularly-Archive/2022/tree/master/src/DelayQueue) 
+* [gRPC 鍔ㄦ�佽皟鐢ㄧず渚媇(https://github.com/Regularly-Archive/2022/tree/master/src/DynamicGrpc) 
 
 
