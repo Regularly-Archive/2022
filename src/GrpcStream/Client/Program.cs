@@ -6,6 +6,7 @@ using SharedEntities;
 using Newtonsoft.Json;
 using Microsoft.Extensions.DependencyInjection;
 using System.IO;
+using Google.Protobuf;
 
 namespace GrpcStream
 {
@@ -15,7 +16,7 @@ namespace GrpcStream
         {
             AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 
-            Console.WriteLine("请输入功能选项：\r\n1. 普通 gRPC\r\n2. 客户端流式 gRPC\r\n3. 服务端流式 gRPC\r\n4. 双向流流式 gRPC\r\n5. 文件上传\r\n6. 文件下载\r\n按Q退出");
+            Console.WriteLine("请输入功能选项：\r\n1. 普通 gRPC\r\n2. 客户端流式 gRPC\r\n3. 服务端流式 gRPC\r\n4. 双向流流式 gRPC\r\n5. 文件上传\r\n6. 文件下载\r\n\r\n按Q退出");
 
             var services = new ServiceCollection();
             services.AddGrpcClient<HeartBeatService.HeartBeatServiceClient>(client => client.Address = new Uri("http://localhost:5000"));
@@ -77,25 +78,49 @@ namespace GrpcStream
                         break;
                     case ConsoleKey.D5:
                         var uploadResult = fileServiceClient.UploadFile();
-                        var uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "ACRouge.png");
-                        var content = Google.Protobuf.ByteString.CopyFrom(File.ReadAllBytes(uploadPath));
-                        var uploadRequest = new UploadFileRequest() { FileName = "ACRouge.png", Content = content };
-                        await uploadResult.RequestStream.WriteAsync(uploadRequest);
-                        await uploadResult.RequestStream.CompleteAsync();
 
+                        var uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "ACRouge.png");
+
+                        using (var fileStram = File.OpenRead(uploadPath))
+                        {
+                            var readSize = 0;
+                            var fileSize = fileStram.Length;
+                            var buffer = new byte[1024 * 512];
+                            while (readSize < fileSize)
+                            {
+                                fileStram.Seek(readSize, SeekOrigin.Begin);
+                                await fileStram.ReadAsync(buffer, 0, buffer.Length);
+                                var request = new UploadFileRequest() { Content = ByteString.CopyFrom(buffer), FileName = uploadPath };
+                                await uploadResult.RequestStream.WriteAsync(request);
+                                readSize += buffer.Length;
+                                Console.WriteLine($"  Send {readSize}/{fileSize} via gRPC Streaming...");
+                            }
+                        }
+                        
+                        await uploadResult.RequestStream.CompleteAsync();
                         var reply = await uploadResult.ResponseAsync;
-                        Console.WriteLine($"File Uploaded to /{reply.FilePath}");
+                        Console.WriteLine($"  File Uploaded to /{reply.FilePath}");
 
                         break;
                     case ConsoleKey.D6:
                         var downloadRequest = new DownloadFileRequest() { FilePath = "228784a3-4e1f-42ab-9fe1-fa3d42278ada.png" };
                         var downloadResult = fileServiceClient.DownloadFile(downloadRequest);
                         var downloadPath = Path.Combine(Directory.GetCurrentDirectory(), downloadRequest.FilePath);
-                        while (await downloadResult.ResponseStream.MoveNext(CancellationToken.None))
+                        if (File.Exists(downloadPath)) File.Delete(downloadPath);
+                        using(var fileStram = File.Open(downloadPath, FileMode.Append, FileAccess.Write))
                         {
-                            await File.WriteAllBytesAsync(downloadPath, downloadResult.ResponseStream.Current.Content.ToByteArray());
+                            var writeSize = 0;
+                            while (await downloadResult.ResponseStream.MoveNext(CancellationToken.None))
+                            {
+                                var current = downloadResult.ResponseStream.Current;
+                                var bytes = current.Content.ToByteArray();
+                                fileStram.Seek(writeSize, SeekOrigin.Begin);
+                                await fileStram.WriteAsync(bytes, 0, bytes.Length);
+                                writeSize += bytes.Length;
+                                Console.WriteLine($"  Received {writeSize}/{current.TotalSize} via gRPC Streaming...");
+                            }
                         }
-                        Console.WriteLine($"File Downloaded to {downloadPath}");
+                        Console.WriteLine($"  File Downloaded to {downloadPath}");
                         break;
                 }
 

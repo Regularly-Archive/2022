@@ -24,4 +24,5 @@ message DownloadFileRequest {
 
 message DownloadFileResponse {
   bytes Content = 1;
+  int64 TotalSize = 2;
 }
