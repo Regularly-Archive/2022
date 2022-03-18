@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GrpcStream.Services;
+using GrpcStreamServer.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -17,7 +18,11 @@ namespace GrpcStream
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddGrpc();
+            services.AddGrpc(options =>
+            {
+                options.MaxReceiveMessageSize = null; // 10 MB
+                options.MaxSendMessageSize = null; // 10 MB
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -33,6 +38,7 @@ namespace GrpcStream
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapGrpcService<HeartBeatServicecs>();
+                endpoints.MapGrpcService<FileService>();
 
                 endpoints.MapGet("/", async context =>
                 {

@@ -6,7 +6,14 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Remove="Protos\files.proto" />
+  </ItemGroup>
+
 	<ItemGroup>
+		<Protobuf Include="Protos\files.proto">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Protobuf>
 		<Protobuf Include="Protos\greet.proto" GrpcServices="Both" />
 	</ItemGroup>
 

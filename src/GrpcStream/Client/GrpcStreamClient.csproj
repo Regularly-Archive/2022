@@ -17,4 +17,10 @@
     <ProjectReference Include="..\SharedEntities\SharedEntities.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="ACRouge.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
