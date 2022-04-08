@@ -1,6 +1,7 @@
 ﻿using Grpc.Core;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,19 +30,14 @@ namespace PaymentService.Controllers
             if (string.IsNullOrEmpty(paymentInfo.OrderId))
                 return new JsonResult(new { Msg = "订单Id不允许为空" });
 
-            // 设置请求头
-            var headers = new Metadata();
-            headers.Add("x-request-id", Request.Headers["x-request-id"].ToString());
-            headers.Add("x-b3-traceid", Request.Headers["x-b3-traceid"].ToString());
-            headers.Add("x-b3-spanid", Request.Headers["x-b3-spanid"].ToString());
-            headers.Add("x-b3-parentspanid", Request.Headers["x-b3-parentspanid"].ToString());
-            headers.Add("x-b3-sampled", Request.Headers["x-b3-sampled"].ToString());
-            headers.Add("x-b3-flags", Request.Headers["x-b3-flags"].ToString());
-            headers.Add("x-ot-span-context", Request.Headers["x-ot-span-context"].ToString());
+            Request.Headers.ToList().ForEach(x =>
+            {
+                _logger.LogInformation($"Key={x.Key}, Value={x.Value}");
+            });
 
             // 调用 EchoService
             var request = new EchoService.HelloRequest() { Name = "PaymentService" };
-            _client.SayHello(request, headers);
+            _client.SayHello(request);
 
             return new JsonResult(new { Msg = $"支付成功, 流水号：{requestId}" });
         }

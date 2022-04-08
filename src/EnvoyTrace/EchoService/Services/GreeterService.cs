@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace EchoService
 {
@@ -17,6 +18,11 @@ namespace EchoService
 
         public override Task<HelloReply> SayHello(HelloRequest request, ServerCallContext context)
         {
+            context.RequestHeaders.ToList().ForEach(x =>
+            {
+                _logger.LogInformation($"Key={x.Key}, Value={x.Value}");
+            });
+
             return Task.FromResult(new HelloReply
             {
                 Message = "Hello " + request.Name
