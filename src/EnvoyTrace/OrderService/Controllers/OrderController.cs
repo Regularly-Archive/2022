@@ -32,14 +32,10 @@ namespace OrderService.Controllers
                 Remark = orderInfo.Remark,
             };
 
-            // 设置请求头
-            _httpClient.DefaultRequestHeaders.Add("x-request-id", Request.Headers["x-request-id"].ToString());
-            _httpClient.DefaultRequestHeaders.Add("x-b3-traceid", Request.Headers["x-b3-traceid"].ToString());
-            _httpClient.DefaultRequestHeaders.Add("x-b3-spanid", Request.Headers["x-b3-spanid"].ToString());
-            _httpClient.DefaultRequestHeaders.Add("x-b3-parentspanid", Request.Headers["x-b3-parentspanid"].ToString());
-            _httpClient.DefaultRequestHeaders.Add("x-b3-sampled", Request.Headers["x-b3-sampled"].ToString());
-            _httpClient.DefaultRequestHeaders.Add("x-b3-flags", Request.Headers["x-b3-flags"].ToString());
-            _httpClient.DefaultRequestHeaders.Add("x-ot-span-context", Request.Headers["x-ot-span-context"].ToString());
+            Request.Headers.ToList().ForEach(x =>
+            {
+                _logger.LogInformation($"Key={x.Key}, Value={x.Value}");
+            });
 
             // 调用/Payment接口
             var content = new StringContent(JsonConvert.SerializeObject(paymentInfo), Encoding.UTF8, "application/json");

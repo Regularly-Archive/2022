@@ -18,6 +18,16 @@ namespace EchoService
         {
             services.AddGrpc();
             services.AddGrpcReflection();
+            services.AddHeaderPropagation(opt =>
+            {
+                opt.Headers.Add("x-request-id");
+                opt.Headers.Add("x-b3-traceid");
+                opt.Headers.Add("x-b3-spanid");
+                opt.Headers.Add("x-b3-parentspanid");
+                opt.Headers.Add("x-b3-sampled");
+                opt.Headers.Add("x-b3-flags");
+                opt.Headers.Add("x-ot-span-context");
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -27,6 +37,8 @@ namespace EchoService
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseHeaderPropagation();
 
             app.UseRouting();
 
