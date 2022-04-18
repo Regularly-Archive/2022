@@ -25,6 +25,24 @@ static_resources:
             typed_config:
               "@type": type.googleapis.com/envoy.extensions.access_loggers.file.v3.FileAccessLog
               path: "/etc/envoy/logs/request_log"
+              format: "[%START_TIME%] %REQ(:METHOD)% %REQ(X-ENVOY-ORIGINAL-PATH?:PATH)% %PROTOCOL% %RESPONSE_CODE% %RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)% %REQ(X-REQUEST-ID)% %REQ(:AUTHORITY)% %UPSTREAM_HOST%\n"
+              # json_format: 
+              #   start: "[%START_TIME%] "
+              #   method: "%REQ(:METHOD)%"
+              #   url: "%REQ(X-ENVOY-ORIGINAL-PATH?:PATH)%"
+              #   protocol: "%PROTOCOL%"
+              #   status: "%RESPONSE_CODE%"
+              #   respflags: "%RESPONSE_FLAGS%"
+              #   bytes-received: "%BYTES_RECEIVED%"
+              #   bytes-sent: "%BYTES_SENT%"
+              #   duration: "%DURATION%"
+              #   upstream-service-time: "%RESP(X-ENVOYUPSTREAM-SERVICE-TIME)%"
+              #   x-forwarded-for: "%REQ(X-FORWARDED-FOR)%"
+              #   user-agent: "%REQ(USER-AGENT)%"
+              #   requestid: "%REQ(X-REQUEST-ID)%"
+              #   authority: "%REQ(:AUTHORITY)%"
+              #   upstream-host: "%UPSTREAM_HOST%"
+              #   remote-ip: "%DOWNSTREAM_REMOTE_ADDRESS_WITHOUT_PORT%"
           stat_prefix: ingress_http   
           route_config:
             name: local_route

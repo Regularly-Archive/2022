@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Serilog;
 
 namespace PaymentService
 {
@@ -22,6 +23,9 @@ namespace PaymentService
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
+                }).UseSerilog((context, configure) =>
+                {
+                    configure.ReadFrom.Configuration(context.Configuration);
                 });
     }
 }

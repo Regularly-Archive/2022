@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
+using Serilog;
 
 namespace EchoService
 {
@@ -39,6 +40,9 @@ namespace EchoService
                         });
 
                     });
+                }).UseSerilog((context, configure) =>
+                {
+                    configure.ReadFrom.Configuration(context.Configuration);
                 });
     }
 }
