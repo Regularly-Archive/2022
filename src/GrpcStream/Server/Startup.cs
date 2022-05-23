@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.OpenApi.Models;
 
 namespace GrpcStream
 {
@@ -18,10 +19,22 @@ namespace GrpcStream
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddControllers();
+
             services.AddGrpc(options =>
             {
-                options.MaxReceiveMessageSize = null; // 10 MB
-                options.MaxSendMessageSize = null; // 10 MB
+                options.MaxReceiveMessageSize = null;
+                options.MaxSendMessageSize = null;
+            });
+
+            services.AddGrpcClient<SharedEntities.FileService.FileServiceClient>(options =>
+            {
+                options.Address = new Uri("http://localhost:5000");
+            });
+
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "GrpcStream", Version = "v1" });
             });
         }
 
@@ -33,12 +46,19 @@ namespace GrpcStream
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseSwagger();
+            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "GrpcStream v1"));
+
+            app.UseHttpsRedirection();
+
             app.UseRouting();
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapControllers();
                 endpoints.MapGrpcService<HeartBeatServicecs>();
                 endpoints.MapGrpcService<FileService>();
+
 
                 endpoints.MapGet("/", async context =>
                 {
