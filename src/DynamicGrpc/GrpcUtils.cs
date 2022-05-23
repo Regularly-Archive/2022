@@ -1,5 +1,8 @@
 ﻿using Google.Protobuf;
+using Google.Protobuf.Reflection;
 using Grpc.Core;
+using System;
+using System.Collections.Generic;
 
 namespace DynamicGrpc
 {

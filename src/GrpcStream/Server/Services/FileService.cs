@@ -1,5 +1,6 @@
 ﻿using Google.Protobuf;
 using Grpc.Core;
+using Microsoft.AspNetCore.Hosting;
 using SharedEntities;
 using System;
 using System.Collections.Generic;
@@ -11,25 +12,46 @@ namespace GrpcStreamServer.Services
 {
     public class FileService : SharedEntities.FileService.FileServiceBase
     {
-        private const int ChunkSize = 1024 * 512;
+        private const int ChunkSize = 1024 * 1024;
+
+        private readonly IWebHostEnvironment _webHostEnvironment;
+
+        public FileService(IWebHostEnvironment webHostEnvironment)
+        {
+            _webHostEnvironment = webHostEnvironment;
+        }
+
         public override async Task<UploadFileResponse> UploadFile(IAsyncStreamReader<UploadFileRequest> requestStream, ServerCallContext context)
         {
-            var fileName = $"{Guid.NewGuid().ToString()}.png";
-            var filePath = Path.Combine(Directory.GetCurrentDirectory(), fileName);
-            using(var fileStream = File.Open(filePath, FileMode.Append, FileAccess.Write))
+            var requests = new Queue<UploadFileRequest>();
+            while (await requestStream.MoveNext())
             {
-                var writeSize = 0;
-                while (await requestStream.MoveNext())
-                {
-                    var current = requestStream.Current;
-                    var bytes = current.ToByteArray();
+                var request = requestStream.Current;
+                requests.Enqueue(request);
+            }
 
-                    fileStream.Seek(writeSize, SeekOrigin.Begin);
-                    await fileStream.WriteAsync(bytes, 0, bytes.Length);
-                    writeSize += bytes.Length;
+            var first = requests.Peek();
+            var fileExt = Path.GetExtension(first.FileName);
+            var fileName = $"{Guid.NewGuid().ToString()}{fileExt}";
+            var filePath = Path.Combine(_webHostEnvironment.ContentRootPath, "Upload", fileName);
+
+            var fileFolder = Directory.GetParent(filePath);
+            if (fileFolder != null && !fileFolder.Exists)
+                fileFolder.Create();
+            
+            using (var fileStream = File.Open(filePath, FileMode.Append, FileAccess.Write))
+            {
+                var received = 0L;
+                while (requests.Count() > 0)
+                {
+                    var current = requests.Dequeue();
+                    var buffer = current.Content.ToByteArray();
+                    fileStream.Seek(received, SeekOrigin.Begin);
+                    await fileStream.WriteAsync(buffer);
+                    received += buffer.Length;
                 }
 
-                return new UploadFileResponse() { FilePath = fileName };
+                return new UploadFileResponse() { FilePath = $"/Upload/{fileName}" };
             }
         }
 
@@ -41,20 +63,24 @@ namespace GrpcStreamServer.Services
                 using (var fileStream = File.OpenRead(filePath))
                 {
 
-                    var readSize = 0;
-                    var fileSize = fileStream.Length;
+                    var received = 0L;
+                    var totalLength = fileStream.Length;
 
                     var buffer = new byte[ChunkSize];
-                    while (readSize < fileSize)
+                    while (received < totalLength)
                     {
-                        fileStream.Seek(readSize, SeekOrigin.Begin);
-                        fileStream.Read(buffer, 0, buffer.Length);
-                        await responseStream.WriteAsync(new DownloadFileResponse() { Content = ByteString.CopyFrom(buffer), TotalSize = fileSize });
-                        readSize += buffer.Length;
+                        var length = await fileStream.ReadAsync(buffer);
+                        received += length;
+                        var response = new DownloadFileResponse()
+                        {
+                            Content = ByteString.CopyFrom(buffer),
+                            TotalSize = totalLength
+                        };
+                        await responseStream.WriteAsync(response);
                     }
                 }
             }
-            
+
         }
     }
 }

@@ -1,0 +1,113 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - blog
+
+jobs:
+  train_model:
+    name: Train Model
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      - name: Setup Environment
+        run: |
+          sudo apt-get -y install python2.7-dev
+          sudo apt-get install libhdf5-dev
+          sudo mkdir -p /home/runner/work/
+          sudo git clone https://github.com/jcjohnson/fast-neural-style.git
+          python -m pip install -r requirements.txt
+          
+          cd /home/runner/work/fast-neural-style
+
+
+      - name: Clone Project
+        run: |
+          git 
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.7"
+          architecture: "x64"
+
+      - name: Setup Dependency
+        run: |
+          #sudo apt-get install python-dev libxml2-dev libxslt1-dev zlib1g-dev
+          python -m pip install pip -U
+          python -m pip config set global.index-url http://mirrors.aliyun.com/pypi/simple/
+          python -m pip config set install.trusted-host mirrors.aliyun.com
+
+      - name: Build Site
+        run: |
+          hugo --minify
+          sudo mkdir -p /home/runner/work/artifacts/blog.yuanpei.me
+          sudo cp -r /home/runner/work/hugo-blog/hugo-blog/public/* /home/runner/work/artifacts/blog.yuanpei.me
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v1
+        with:
+          name: blog.yuanpei.me
+          path: /home/runner/work/artifacts/blog.yuanpei.me
+
+  deploy_static_pages:
+    name: Deploy Static Pages
+    needs: build_static_pages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Artifacts for blog.yuanpei.me
+        uses: actions/download-artifact@v1
+        with:
+          name: blog.yuanpei.me
+
+      - name: Deploy Artifacts for blog.yuanpei.me
+        env:
+          GH_REPO: github.com/qinyuanpei/blog.yuanpei.me.git
+        run: |
+          cd ./blog.yuanpei.me
+          git init
+          git config user.name "qinyuanpei"
+          git config user.email "qinyuanpei@163.com"
+          git remote add origin https://$GH_REPO
+          git add .
+          git commit -m "${{ github.event.head_commit.message }}"
+          git tag latest
+          git push --tags --force --quiet "https://${{ secrets.CI_TOKEN }}@$GH_REPO" master:master
+      
+      - name: Generate README.md for github.com
+        env:
+          GH_REPO: github.com/qinyuanpei/qinyuanpei.git
+        run: |
+          sudo mkdir -p /home/runner/work/artifacts/
+          cd /home/runner/work/artifacts/
+          sudo git clone https://github.com/qinyuanpei/qinyuanpei.git 
+          cd /home/runner/work/artifacts/qinyuanpei
+          sudo git config user.name "qinyuanpei"
+          sudo git config user.email "qinyuanpei@163.com"
+          sudo rm -f README.md
+          sudo python -m pip install pip -U
+          sudo python -m pip config set global.index-url http://mirrors.aliyun.com/pypi/simple/
+          sudo python -m pip config set install.trusted-host mirrors.aliyun.com
+          sudo python -m pip install -r requirements.txt 
+          sudo python generator.py
+          sudo git add -f README.md
+          sudo git commit -m "Update README.md by Github Action"
+          sudo git push --force --quiet "https://${{ secrets.CI_TOKEN }}@$GH_REPO" master:master
+
+  audit_static_pages:
+    name: Audit Static Pages
+    needs: deploy_static_pages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Lighthouse for blog.yuanpei.me
+        uses: jakejarvis/lighthouse-action@master
+        with:
+          url: "https://blog.yuanpei.me"
+
+      - name: Upload Report for blog.yuanpei.me
+        uses: actions/upload-artifact@master
+        with:
+          name: blog.yuanpei.me_report
+          path: "./report"

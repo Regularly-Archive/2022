@@ -4,6 +4,7 @@ using Google.Protobuf;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Grpc.Net.Client;
+using Grpc.Reflection.V1Alpha;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Newtonsoft.Json;
 using System.Text;
@@ -17,11 +18,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddGrpc();
 builder.Services.AddGrpcReflection();
 builder.Services.Configure<KestrelServerOptions>(x => x.AllowSynchronousIO = true);
+builder.Services.AddGrpcClient<ServerReflection.ServerReflectionClient>(opt => opt.Address = new Uri("https://localhost:5001"));
+builder.Services.AddTransient<DynamicGrpcCallInvoker>();
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 app.MapGrpcService<GreeterService>();
+app.MapGrpcReflectionService();
 app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
 
 app.MapPost("/api/greet.Greeter/SayHello", async ctx =>
@@ -51,4 +55,13 @@ app.MapPost("/api/greet.Greeter/SayHello", async ctx =>
     }
 });
 
+app.MapGet("/Dynamic", async ctx =>
+{
+    var dynamicGrpc = app.Services.GetService<DynamicGrpcCallInvoker>();
+    await dynamicGrpc.Execute("https://localhost:5001", MethodType.Unary, "greet.Greeter", "SayHello");
+});
+
+
 app.Run();
+
+

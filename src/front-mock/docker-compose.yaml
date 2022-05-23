@@ -7,12 +7,10 @@ services:
       dockerfile: Dockerfile
     image: font_mock
     ports:
-      - "50001:80"
+      - "50001:443"
     volumes:
       - '/etc/localtime:/etc/localtime:ro'
     networks:
       envoymesh:
-        aliases:
-          - font_mock_network
 networks:
   envoymesh: {}
