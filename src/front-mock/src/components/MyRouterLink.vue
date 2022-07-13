@@ -45,7 +45,6 @@ export default {
       }
 
       let queryArray = [];
-      queryArray.push('token=1QAZ2WSX3EDC4RFVV5TGB')
       if (this.to.query) {
         for (let key in this.to.query) {
           const value = encodeURIComponent(this.to.query[key]);
