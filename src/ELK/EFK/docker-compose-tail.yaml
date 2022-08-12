@@ -1,0 +1,57 @@
+version: '3'
+services:
+  flunt_bit:
+    image: cr.fluentbit.io/fluent/fluent-bit
+    container_name: efk_flb
+    volumes:
+      - ./config/fluent-bit/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:rw
+      - ./config/fluent-bit/parser.conf:/fluent-bit/etc/parser.conf:rw
+      - ./data/fluent-bit/:/var/log/flb-storage:rw
+      - ./data/app/logs/:/var/log/:rw
+    ports:
+    - "2323:2020"
+  elasticsearch:
+    image: elasticsearch:7.7.0
+    container_name: efk_es
+    restart: always
+    environment:
+      - "cluster.name=elasticsearch"
+      - "discovery.type=single-node"
+      - "ES_JAVA_OPTS=-Xms512m -Xmx1024m"
+    volumes:
+      - ./data/elasticsearch/plugins:/usr/share/elasticsearch/plugins:rw
+      - ./data/elasticsearch/data:/usr/share/elasticsearch/data:rw
+    ports:
+      - 9200:9200
+  kibana:
+    image: kibana:7.7.0
+    container_name: efk_kibana
+    restart: always
+    depends_on:
+      - elasticsearch
+    environment:
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+    ports:
+      - 5601:5601
+  logstash:
+    image: logstash:7.7.0
+    container_name: efk_logstash
+    restart: always
+    depends_on:
+      - elasticsearch
+    links:
+      - elasticsearch:es
+    ports:
+      - 4560:4560
+  app:
+    build: app/
+    container_name: efk_app
+    ports:
+      - 2333:80
+    volumes:
+      - ./data/app/logs/:/app/logs/:rw
+    environment:
+      ASPNETCORE_URLS: "http://+"
+      ASPNETCORE_ENVIRONMENT: "Development"
+      SERVICE_NAME: "OrderService"
+    
