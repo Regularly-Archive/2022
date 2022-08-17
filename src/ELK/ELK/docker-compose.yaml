@@ -1,0 +1,46 @@
+version: '3'
+services:
+  elasticsearch:
+    image: elasticsearch:7.7.0
+    container_name: efk_es
+    restart: always
+    environment:
+      - "cluster.name=elasticsearch"
+      - "discovery.type=single-node"
+      - "ES_JAVA_OPTS=-Xms512m -Xmx1024m"
+    volumes:
+      - ./data/elasticsearch/plugins:/usr/share/elasticsearch/plugins:rw
+      - ./data/elasticsearch/data:/usr/share/elasticsearch/data:rw
+    ports:
+      - 9200:9200
+  kibana:
+    image: kibana:7.7.0
+    container_name: efk_kibana
+    restart: always
+    depends_on:
+      - elasticsearch
+    environment:
+      - ELASTICSEARCH_URL=http://192.168.50.94:9200
+    ports:
+      - 5601:5601
+  logstash:
+    image: logstash:7.7.0
+    container_name: efk_logstash
+    restart: always
+    depends_on:
+      - elasticsearch
+    links:
+      - elasticsearch:es
+    ports:
+      - 4560:4560
+    volumes:
+      - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf:rw
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:7.5.1
+    depends_on:
+      - logstash
+      - elasticsearch
+      - kibana
+    volumes:
+      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml:rw
+      - ./logs/:/home/logs/:rw
