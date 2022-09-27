@@ -12,16 +12,15 @@ namespace HelloWorld.Fody
 {
     public class ModuleWeaver : BaseModuleWeaver
     {
-        private MethodInfo? _writeLineMethod  => typeof(Console).GetMethod("WriteLine", new Type[] { typeof(string) });
+        private MethodInfo _writeLineMethod  => typeof(Console).GetMethod("WriteLine", new Type[] { typeof(string) });
         public override void Execute()
         {
-            foreach (TypeDefinition type in ModuleDefinition.Types)
+            foreach (var type in ModuleDefinition.Types)
             {
-                foreach (MethodDefinition method in type.Methods)
+                foreach (var method in type.Methods)
                 {
-                    var methodType = method.GetType();
-                    var customerAttributes = methodType.GetCustomAttributes(typeof(HelloWorldAttribute));
-                    if (customerAttributes != null && customerAttributes.Any())
+                    var customerAttribute = method.CustomAttributes.FirstOrDefault(x => x.AttributeType.Name == nameof(HelloWorldAttribute));
+                    if (customerAttribute != null)
                     {
                         ProcessMethod(method);
                     }

@@ -1,11 +1,8 @@
 ﻿using FodyWeavers.Attributes;
 using HelloWorld.Fody;
 using JetBrains.Annotations;
+using System.Reflection.Emit;
 
-[assembly: PublicAPI]
-[module: PublicAPI]
-
-[UsedImplicitly]
 public class Program
 {
     static async Task Main(string[] args)
@@ -19,8 +16,8 @@ public class Program
         //// Exception Handling
         //Divide(1, 1);
 
-        //// NullGuard
-        //Split(null);
+        ////// NullGuard
+        ////Split(null);
 
         Echo();
     }
@@ -34,23 +31,10 @@ public class Program
     [Logging]
     static decimal Divide(decimal a, decimal b) => a / b;
 
-    [NotNull]
-    public static string[] Split([NotNull][System.Diagnostics.CodeAnalysis.NotNull] Foo foo)
-    {
-        return foo.Colors.Split(new char[] { ',' });
-    }
-
     [HelloWorld]
-    static void Echo()
+    public static void Echo()
     {
         Console.WriteLine("Hello Fody.");
-    }
-
-    [UsedImplicitly]
-    public class Foo
-    {
-        [NotNull]
-        public string Colors { get; set; }
     }
 }
 
