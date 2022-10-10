@@ -352,3 +352,4 @@ MigrationBackup/
 /src/YAPI/data/
 
 /src/ELK/EFK/data/
+src/ELK/ELK/data/
