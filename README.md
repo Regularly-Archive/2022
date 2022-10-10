@@ -14,6 +14,7 @@ Non-formal Project of 2022
 * [ASP.NET Core 支持 Tcp 协议的尝试](https://github.com/Regularly-Archive/2022/tree/master/src/MultipleProtocols)
 * [Vue-Router + Iframe 混搭预研](https://github.com/Regularly-Archive/2022/tree/master/src/route-iframe)
 * [.NET 进程内队列 Channel 研究](https://github.com/Regularly-Archive/2022/tree/master/src/Channel.Learning)
+* [Fody 静态编织研究](https://github.com/Regularly-Archive/2022/tree/master/src/HelloWorld.Fody)
 
 
 
