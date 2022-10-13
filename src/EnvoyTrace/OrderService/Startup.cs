@@ -11,6 +11,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using OpenTelemetry;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 
 namespace OrderService
 {
@@ -46,7 +49,18 @@ namespace OrderService
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "OrderService", Version = "v1" });
             });
-            
+
+            services.AddOpenTelemetryTracing((builder) => builder
+            .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("OrderService-Inject"))
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            .AddConsoleExporter()
+            .AddJaegerExporter(options =>
+            {
+                options.AgentHost = "192.168.50.162";
+                options.AgentPort = 6831;
+            }));
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
