@@ -1,10 +1,15 @@
 ﻿ldap://192.168.6.30:389
 
 
-CN=administrator,CN=Users,DC=fgms,DC=dev,DC=com
+CN=administrator,OU=OPS,OU=4GMS-Users,DC=fgms,DC=dev,DC=com
 Stelect2013
 
-CN=Configuration,DC=fgms,DC=dev,DC=com
+CN=Configuration,DC=fgms,DC=dev,DC=com，这是默认的 DN
+
+------------------------------------------------------------------------
+OU=OPS,OU=4GMS-Users,DC=fgms,DC=dev,DC=com
+OU=Admin,OU=4GMS-Users,DC=fgms,DC=dev,DC=com
+------------------------------------------------------------------------
 
 修改 config.php 增加 'check_data_directory_permissions' => false,
 
@@ -19,5 +24,5 @@ CN=Configuration,DC=fgms,DC=dev,DC=com
     'apps' => ['admin_audit'],
   ],
 
-1、日志中的用户名无法使用 DisplayName
+1、日志中的用户名无法使用 DisplayName，用户/专家/内部用户名，配置为：displayname
 2、单点登录需要输入用户名、密码
