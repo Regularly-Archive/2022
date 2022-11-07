@@ -5,6 +5,7 @@ import joblib
 import os
 import logging
 import numpy as np
+import cv2
 
 # Logging
 logger = logging.getLogger(__name__)
@@ -48,9 +49,10 @@ def face_recognize_train(dir):
         face_encodings_mean_list.append((face_encoding_mean_x, person_label))
 
     # 使用支持向量机进行模型训练
-    clf = svm.SVC(gamma ='scale')
+    clf = svm.SVC(C=1.0, kernel="linear", gamma ='scale', probability = True)
     encodings = list(map(lambda x:x[0], face_encodings_mean_list))
     names = list(map(lambda x:x[1], face_encodings_mean_list))
+    print(names)
     clf.fit(encodings, names)
     score = clf.score(encodings, names)
     logger.info(f"train score: {score}")
@@ -78,6 +80,12 @@ def face_recoginize_test(clf, dir):
             for i in range(length):
                 test_image_enc = face_recognition.face_encodings(test_image)[i]
                 predict = clf.predict([test_image_enc])
+                print(predict)
+                preds = clf.predict_proba([test_image_enc])[0]
+                j = np.argmax(preds)
+                proba = preds[j]
+                name = clf.classes_[j]
+                print(f'name={name}, proba={proba * 100}%')
                 score = accuracy_score([person_label], predict)
                 logger.info(f"Process image {image_path} finsihed. Predict：{predict[0]}, Actual：{person_label}, Score：{score}")
                 if (predict[0] == person_label):
@@ -86,7 +94,22 @@ def face_recoginize_test(clf, dir):
 
     logger.info(f'Correct Rate：{round(matched_images / total_images * 100, 4)}%')
 
-  
+def compare_face(clf, image):
+    results = []
+    face_locations = face_recognition.face_locations(image)
+    
+    for y, right, bottom, x in face_locations:
+        w = right - x
+        h = bottom - y
+        image_enc = face_recognition.face_encodings(image[y: bottom, x: right])
+        if image_enc == None or len(image_enc) == 0:
+            return results
+
+        predict = clf.predict(image_enc)
+        results.append(((x, y, w, h), predict[0]))
+    
+    return results
+
 def main():
     if not os.path.exists(FACES_FEATURES_MODEL_FILE):
         clf = face_recognize_train(FACES_DIR)

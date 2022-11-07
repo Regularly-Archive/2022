@@ -6,7 +6,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Serilog;
+using NLog.Config;
+using OrderService.Extensions;
 
 namespace OrderService
 {
@@ -14,6 +15,7 @@ namespace OrderService
     {
         public static void Main(string[] args)
         {
+            ConfigurationItemFactory.Default.LayoutRenderers.RegisterDefinition("my-trace-id", typeof(MyTraceLayoutRenderer));
             CreateHostBuilder(args).Build().Run();
         }
 
@@ -22,9 +24,6 @@ namespace OrderService
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
-                }).UseSerilog((context, configure) =>
-                {
-                    configure.ReadFrom.Configuration(context.Configuration);
                 });
     }
 }

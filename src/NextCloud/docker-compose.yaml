@@ -18,7 +18,8 @@ services:
     restart: always
   nextcloud_web:
     container_name: nextcloud_web
-    image: nextcloud
+    # image: nextcloud
+    build: ./
     ports:
       - 8061:80
       - 4433:443
@@ -31,4 +32,5 @@ services:
       - MYSQL_PASSWORD=nextcloud
     volumes:
       - "./nextcloud/data:/var/www/html" #./data是数据位置，可以修改
+      - "./apache2/sites-available/000-default.conf:/etc/apache2/sites-available/000-default.conf"
     restart: always

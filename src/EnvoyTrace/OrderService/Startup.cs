@@ -14,6 +14,12 @@ using Microsoft.OpenApi.Models;
 using OpenTelemetry;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using Microsoft.Extensions.Logging;
+using NLog.Extensions.Logging;
+using System.Diagnostics;
+using System.Diagnostics.Tracing;
+using OrderService.Extensions;
+using OrderService;
 
 namespace OrderService
 {
@@ -29,6 +35,10 @@ namespace OrderService
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddLogging(option =>
+            {
+                option.AddNLog();
+            });
             services.AddControllers();
             services.AddHeaderPropagation(opt =>
             {
@@ -51,9 +61,11 @@ namespace OrderService
             });
 
             services.AddOpenTelemetryTracing((builder) => builder
-            .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("OrderService-Inject"))
-            .AddAspNetCoreInstrumentation()
-            .AddHttpClientInstrumentation()
+            .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("reverse-proxy"))
+            //.AddAspNetCoreInstrumentation()
+            //.AddHttpClientInstrumentation()
+            .AddSource("MyTrace")
+            .AddSource("OrderService")
             .AddConsoleExporter()
             .AddJaegerExporter(options =>
             {
@@ -61,11 +73,23 @@ namespace OrderService
                 options.AgentPort = 6831;
             }));
 
+            DiagnosticListener instance = new DiagnosticListener("Microsoft.AspNetCore");
+            services.AddSingleton(instance);
+
+            services.AddTransient<MyDiagnosticObserver>();
+            services.AddSingleton<MyTraceInvoker>(sp =>
+            {
+                return new MyTraceInvoker(sp.GetService<ILoggerFactory>().CreateLogger<MyTraceInvoker>());
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            var listener = app.ApplicationServices.GetService<DiagnosticListener>();
+            var observer = app.ApplicationServices.GetService<MyDiagnosticObserver>();
+            listener.Subscribe(observer);
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -77,6 +101,8 @@ namespace OrderService
             app.UseHttpsRedirection();
 
             app.UseHeaderPropagation();
+
+            app.UseMiddleware<TraceMiddleware>();
 
             app.UseRouting();
 

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using OrderService;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -18,42 +19,65 @@ namespace OrderService.Controllers
         private readonly HttpClient _httpClient;
         private readonly ILogger<OrderController> _logger;
         private readonly ActivitySource _activitySource = new ActivitySource("OrderService");
-        public OrderController(IHttpClientFactory httpClientFactory, ILogger<OrderController> logger)
+        private readonly MyTraceInvoker _invoker;
+        public OrderController(IHttpClientFactory httpClientFactory, ILogger<OrderController> logger, MyTraceInvoker invoker)
         {
             _httpClient = httpClientFactory.CreateClient("PaymentService");
             _logger = logger;
+            _invoker = invoker;
         }
 
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] OrderInfo orderInfo)
         {
-            using (var activity = _activitySource.CreateActivity("MakePayment", ActivityKind.Internal))
+            await _invoker.InvokeAsync();
+            Request.Headers.ToList().ForEach(x =>
             {
-                Activity.Current?.AddEvent(new ActivityEvent("Prepare PaymentInfo..."));
-                var paymentInfo = new PaymentInfo()
+                _logger.LogInformation($"Key={x.Key}, Value={x.Value}");
+            });
+
+            using (_activitySource.StartActivity("CheckOrder", ActivityKind.Internal, Request.Headers["x-b3-traceid"]))
+            {
+                if (await CheckOrder(orderInfo))
                 {
-                    OrderId = orderInfo.OrderId,
-                    PaymentId = Guid.NewGuid().ToString("N"),
-                    Remark = orderInfo.Remark,
-                };
+                    Activity.Current?.AddEvent(new ActivityEvent("Prepare PaymentInfo..."));
+                    Activity.Current?.AddTag("guid:x-request-id", Request.Headers["x-request-id"]);
+                    var paymentInfo = new PaymentInfo()
+                    {
+                        OrderId = orderInfo.OrderId,
+                        PaymentId = Guid.NewGuid().ToString("N"),
+                        Remark = orderInfo.Remark,
+                    };
 
-                Request.Headers.ToList().ForEach(x =>
+                    using (_activitySource.StartActivity("PayOrder", ActivityKind.Internal))
+                    {
+                        var result = await PayOrder(paymentInfo) ? "成功" : "失败";
+                        Activity.Current?.AddEvent(new ActivityEvent("Handle Payment API..."));
+                        Activity.Current?.AddTag("guid:x-request-id", Request.Headers["x-request-id"]);
+                        return new JsonResult(new { Msg = $"订单创建{result}" });
+                    }
+                }
+                else
                 {
-                    _logger.LogInformation($"Key={x.Key}, Value={x.Value}");
-                });
-
-                // 调用/Payment接口
-                Activity.Current?.AddEvent(new ActivityEvent("Request Payment API..."));
-                var content = new StringContent(JsonConvert.SerializeObject(paymentInfo), Encoding.UTF8, "application/json");
-                var response = await _httpClient.PostAsync("/Payment", content);
-
-                var json = await response.Content.ReadAsStringAsync();
-                _logger.LogInformation(json);
-
-                var result = response.IsSuccessStatusCode ? "成功" : "失败";
-                Activity.Current?.AddEvent(new ActivityEvent("Handle Payment API..."));
-                return new JsonResult(new { Msg = $"订单创建{result}" });
+                    return new JsonResult(new { Msg = $"订单{orderInfo.OrderId}无效" });
+                }
             }
+        }
+
+        private Task<bool> CheckOrder(OrderInfo orderInfo)
+        {
+            return Task.FromResult(true);
+        }
+
+        private async Task<bool> PayOrder(PaymentInfo paymentInfo)
+        {
+            var content = new StringContent(JsonConvert.SerializeObject(paymentInfo), Encoding.UTF8, "application/json");
+            var response = await _httpClient.PostAsync("/Payment", content);
+
+            var json = await response.Content.ReadAsStringAsync();
+            _logger.LogInformation(json);
+
+            return response.IsSuccessStatusCode;
         }
     }
 }

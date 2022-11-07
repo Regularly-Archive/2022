@@ -24,7 +24,7 @@ face_reco_model = dlib.face_recognition_model_v1("data/data_dlib/dlib_face_recog
 FACES_DIR = './faces/'
 FACES_FEATURES_CSV_FILE = './data/features_all.csv'
 FACES_FATURES_DISTANCE_THRESHOLD = 0.4
-OUTPUT_DIR = './ouput/'
+OUTPUT_DIR = './output/'
 
 def get_mean_features_of_face(path):
     path = os.path.abspath(path)
@@ -71,7 +71,7 @@ def get_128d_features_of_face(image_path):
 
 def extract_features_to_csv(faces_dir):
     mean_features_list = list(get_mean_features_of_face(faces_dir))
-    with open("data/features_all.csv", "w", newline="") as csvfile:
+    with open(FACES_FEATURES_CSV_FILE, "w", newline="") as csvfile:
         writer = csv.writer(csvfile)
         for mean_features in mean_features_list:
             person_features = mean_features[0]
@@ -177,4 +177,7 @@ def main():
     logger.info(f'Correct Rate：{round(matched_images / total_images * 100, 4)}%')
 
 if __name__ == '__main__':
+    if not os.path.exists(FACES_FEATURES_CSV_FILE):
+        extract_features_to_csv(FACES_DIR)
+
     main()

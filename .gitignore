@@ -353,4 +353,9 @@ MigrationBackup/
 
 /src/ELK/EFK/data/
 /src/ELK/ELK/data/
+/src/FaceTrain/faces/
+/src/FaceTrain/train/datasets/
+/src/FaceTrain/output/
+/src/NextCloud/nextcloud/
+/src/NextCloud/mysql/
 
