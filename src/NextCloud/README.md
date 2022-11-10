@@ -48,4 +48,21 @@ nextcloud.fgms.dev.com
 
 火狐打开 about:config 配置以下参数
 
-network.negotiate-auth.trusted-uris
+network.negotiate-auth.trusted-uris .fgms.dev.com
+
+ network.auth.use-sspi false
+
+Edge/Chrome  edge://policy 配置以下参数
+
+修改注册表，HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Edge
+AuthNegotiateDelegateAllowlist，维护值：.fgms.dev.com
+BasicAuthOverHttpEnabled: true
+AuthSchemes basic,digest,ntlm,negotiate
+
+验证 keytab 文件
+kinit -kt /etc/apache2/krb-container.keytab HTTP/nextcloud.fgms.dev.com@FGMS.DEV.COM
+
+生成 keytab 文件
+ktpass -out krb-container.keytab -mapUser KRB-CONTAINER@FGMS.DEV.COM /pass Stelect2013 -ptype KRB5_NT_PRINCIPAL -princ HTTP/nextcloud.fgms.dev.com@FGMS.DEV.COM -crypto ALL
+
+https://learn.microsoft.com/zh-cn/troubleshoot/developer/webapps/iis/www-authentication-authorization/kerberos-double-hop-authentication-edge-chromium#step-2-install-the-microsoft-edge-administrative-templates
