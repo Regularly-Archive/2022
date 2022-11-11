@@ -5,6 +5,7 @@ ADD /config/etc/krb5.conf /etc/
 ADD /config/etc/resolv.conf /etc/
 ADD /config/etc/apt/sources.list /etc/apt/
 ADD /config/etc/krb-container.keytab /etc/apache2/
+COPY /apache2/certs/* /etc/certs/
 # RUN chmod 777 /etc/apache2/krb-container.keytab
     
 
@@ -27,6 +28,7 @@ RUN apt -y install realmd dbus;
 
 # RUN a2enmod ldap
 # RUN a2enmod authnz_ldap
+RUN a2enmod ssl
 
 RUN  service apache2 restart
 

@@ -66,3 +66,6 @@ kinit -kt /etc/apache2/krb-container.keytab HTTP/nextcloud.fgms.dev.com@FGMS.DEV
 ktpass -out krb-container.keytab -mapUser KRB-CONTAINER@FGMS.DEV.COM /pass Stelect2013 -ptype KRB5_NT_PRINCIPAL -princ HTTP/nextcloud.fgms.dev.com@FGMS.DEV.COM -crypto ALL
 
 https://learn.microsoft.com/zh-cn/troubleshoot/developer/webapps/iis/www-authentication-authorization/kerberos-double-hop-authentication-edge-chromium#step-2-install-the-microsoft-edge-administrative-templates
+
+下载 https://www.microsoft.com/download/details.aspx?id=57576 
+安装后从 C:\Program Files (x86)\Microsoft Group Policy\Windows 10 October 2018 Update (1809) v2 复制 PolicyDefinitions 到域服务器的 
