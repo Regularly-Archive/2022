@@ -28,7 +28,7 @@ RUN apt -y install realmd dbus;
 
 # RUN a2enmod ldap
 # RUN a2enmod authnz_ldap
-RUN a2enmod ssl
+# RUN a2enmod ssl
 
 RUN  service apache2 restart
 

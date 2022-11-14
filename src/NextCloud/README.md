@@ -69,3 +69,5 @@ https://learn.microsoft.com/zh-cn/troubleshoot/developer/webapps/iis/www-authent
 
 下载 https://www.microsoft.com/download/details.aspx?id=57576 
 安装后从 C:\Program Files (x86)\Microsoft Group Policy\Windows 10 October 2018 Update (1809) v2 复制 PolicyDefinitions 到域服务器的 
+
+edge://net-internals/#hsts
