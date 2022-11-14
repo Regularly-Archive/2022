@@ -58,6 +58,7 @@ Edge/Chrome  edge://policy 配置以下参数
 AuthNegotiateDelegateAllowlist，维护值：.fgms.dev.com
 BasicAuthOverHttpEnabled: true
 AuthSchemes basic,digest,ntlm,negotiate
+AuthServerAllowlist: .fgms.dev.com
 
 验证 keytab 文件
 kinit -kt /etc/apache2/krb-container.keytab HTTP/nextcloud.fgms.dev.com@FGMS.DEV.COM
