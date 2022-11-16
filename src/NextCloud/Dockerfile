@@ -7,8 +7,8 @@ ADD /config/etc/apt/sources.list /etc/apt/
 ADD /config/etc/krb-container.keytab /etc/apache2/
 COPY /apache2/certs/* /etc/certs/
 # RUN chmod 777 /etc/apache2/krb-container.keytab
-RUN chown root /etc/apache2/krb-container.keytab
-RUN chmod 640 /etc/apache2/krb-container.keytab
+RUN chown www-data:www-data /etc/apache2/krb-container.keytab
+RUN chmod 777 /etc/apache2/krb-container.keytab
 
 COPY clear.sh /etc/
     
