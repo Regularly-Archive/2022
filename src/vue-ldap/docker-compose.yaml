@@ -1,0 +1,27 @@
+version: "3.8"
+
+services:
+  nginx_ldap:
+    build:
+      context: ./
+      dockerfile: Dockerfile_Nginx
+    image: nginx_ldap
+    ports:
+      - "50001:443"
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+    networks:
+      envoymesh:
+  apache_ldap:
+    build:
+      context: ./
+      dockerfile: Dockerfile_Apache
+    image: apache_ldap
+    ports:
+      - "50002:80"
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+    networks:
+      envoymesh:
+networks:
+  envoymesh: {}

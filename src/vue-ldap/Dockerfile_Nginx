@@ -1,0 +1,84 @@
+# build
+FROM node:lts-alpine as build
+WORKDIR /app
+COPY package*.json ./
+RUN npm install -g cnpm --registry=https://registry.npm.taobao.org
+RUN cnpm install
+COPY /. ./
+RUN npm run build
+
+# deploy
+FROM nginx:stable-alpine as deploy
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories
+RUN apk add git openldap-dev gcc g++ make pcre zlib openssl autoconf automake;
+RUN apk --no-cache add --virtual build-dependencies build-base;
+RUN git clone https://github.com/kvspb/nginx-auth-ldap.git /usr/src/nginx-auth-ldap/; 
+RUN mkdir -p /usr/src/ && \
+    cd /usr/src/ && \
+    wget  http://www.zlib.net/zlib-1.2.13.tar.gz && \
+    tar zxvf zlib-1.2.13.tar.gz && \
+    cd zlib-1.2.13 && \
+    ./configure && make && make install
+
+# RUN NGINX_CONFIG=$(nginx -V 2>&1 | grep 'configure arguments' | cut -c21-); \
+# 重新编译 Nginx 
+RUN wget http://nginx.org/download/nginx-1.22.1.tar.gz; \ 
+    tar -zxvf nginx-1.22.1.tar.gz; \ 
+    cd nginx-1.22.1; \
+    ./configure \
+        --prefix=/etc/nginx \
+        --sbin-path=/usr/sbin/nginx \
+        --modules-path=/usr/lib/nginx/modules \
+        --conf-path=/etc/nginx/nginx.conf \
+        --error-log-path=/var/log/nginx/error.log \
+        --http-log-path=/var/log/nginx/access.log \
+        --pid-path=/var/run/nginx.pid \
+        --lock-path=/var/run/nginx.lock \ 
+        --http-client-body-temp-path=/var/cache/nginx/client_temp \
+        --http-proxy-temp-path=/var/cache/nginx/proxy_temp \
+        --http-fastcgi-temp-path=/var/cache/nginx/fastcgi_temp \
+        --http-uwsgi-temp-path=/var/cache/nginx/uwsi_temp \
+        --http-scgi-temp-path=/var/cache/nginx/scgi_temp \
+        --with-perl_modules_path=/usr/lib/perl5/vendor_perl \
+        --user=nginx \
+        --group=nginx \
+        --with-compat \
+        --with-threads \
+        --with-http_addition_module \
+        --with-http_auth_request_module \
+        --with-http_dav_module \
+        --with-http_flv_module \
+        --with-http_gunzip_module \
+        --with-http_gzip_static_module \
+        --with-http_mp4_module \
+        --with-http_random_index_module \
+        --with-http_realip_module \
+        --with-http_secure_link_module \
+        --with-http_slice_module \
+        --with-http_ssl_module \
+        --with-http_stub_status_module \
+        --with-http_sub_module \
+        --with-http_v2_module \
+        --with-mail \
+        --with-mail_ssl_module \
+        --with-stream \
+        --with-stream_realip_module \
+        --with-stream_ssl_module \
+        --with-stream_ssl_preread_module \
+        --with-cc-opt='-Os -fomit-frame-pointer -g' \
+        --with-ld-opt=-Wl,--as-needed,-O1,--sort-common \
+        --add-module=/usr/src/nginx-auth-ldap/ \
+        --without-http_rewrite_module \
+        --with-zlib=/usr/src/zlib-1.2.13/ 
+
+## RUN systemctl restart service apache2 start
+RUN cd nginx-1.22.1 && make && make install
+
+
+COPY --from=build /app/dist/ /usr/nginx/wwwroot
+COPY /nginx/ssl/ /usr/nginx/ssl/
+COPY /nginx/nginx.conf /etc/nginx/nginx.conf
+
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
+
