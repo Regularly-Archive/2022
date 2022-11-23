@@ -14,7 +14,7 @@ COPY clear.sh /etc/
     
 
 RUN apt-get update; \
-    apt-get install -y libldap2; \
+    apt-get install -y libldap2-dev; \
     apt-get install -y -t sid libapache2-mod-auth-kerb; \
     # apt-get install -y --no-install-recommends libapache2-mod-auth-gssapi; \
     # apt-get install -y msktutil; \
