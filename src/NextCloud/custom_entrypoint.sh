@@ -1,6 +1,6 @@
-# 生成 crontab 配置
+﻿# 生成 crontab 配置
 cronfile='/usr/crontab/cron.conf'
-renewTicket='0 0 */1 * * root /usr/crontab/renew.sh'
+renewTicket='*/10 * * * * /usr/crontab/renew.sh'
 echo "$renewTicket" | tee -a $cronfile
 # 激活 crontab
 crontab $cronfile
