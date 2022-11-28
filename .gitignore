@@ -358,4 +358,5 @@ MigrationBackup/
 /src/FaceTrain/output/
 /src/NextCloud/nextcloud/
 /src/NextCloud/mysql/
+/src/NextCloud/data/
 

@@ -8,17 +8,16 @@ services:
     ports:
       - 3306:3306
     volumes:
-      - "./mysql/data/:/var/lib/mysql"
+      - "./data/mysql/:/var/lib/mysql"
     environment:
       - TZ=Asia/Shanghai
-      - MYSQL_ROOT_PASSWORD=nextcloud
-      - MYSQL_DATABASE=nextcloud
-      - MYSQL_USER=nextcloud
-      - MYSQL_PASSWORD=nextcloud
+      - MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD
+      - MYSQL_DATABASE=$MYSQL_DATABASE
+      - MYSQL_USER=$MYSQL_USER
+      - MYSQL_PASSWORD=$MYSQL_PASSWORD
     restart: always
   nextcloud_web:
     container_name: nextcloud_web
-    # image: nextcloud
     build: ./
     ports:
       - 8061:80
@@ -27,10 +26,10 @@ services:
       - nextcloud_db
     environment:
       - MYSQL_HOST=nextcloud_db
-      - MYSQL_DATABASE=nextcloud
-      - MYSQL_USER=nextcloud
-      - MYSQL_PASSWORD=nextcloud
+      - MYSQL_DATABASE=$MYSQL_DATABASE
+      - MYSQL_USER=$MYSQL_USER
+      - MYSQL_PASSWORD=$MYSQL_PASSWORD
     volumes:
-      - "./nextcloud/data:/var/www/html" #./data是数据位置，可以修改
-      - "./apache2/sites-available/000-default.conf:/etc/apache2/sites-available/000-default.conf"
+      - "./data/nextcloud:/var/www/html" #./data是数据位置，可以修改
+      - "./docker-reference/000-default.conf:/etc/apache2/sites-available/000-default.conf"
     restart: always

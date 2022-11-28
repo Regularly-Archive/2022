@@ -1,10 +1,10 @@
 FROM nextcloud as base
 
-ADD /config/etc/krb5.conf /etc/
-ADD /config/etc/apt/sources.list /etc/apt/
-ADD /config/etc/krb-container.keytab /etc/apache2/
-COPY /apache2/certs/* /etc/certs/
-COPY /crontab/* /usr/crontab/
+COPY /docker-reference/krb5.conf /etc/krb5.conf
+COPY /docker-reference/sources.list /etc/apt/sources.list
+COPY /docker-reference/krb-container.keytab /etc/apache2/krb-container.keytab
+COPY /docker-reference/certs/* /etc/certs/
+COPY /docker-reference/crontab/* /usr/crontab/
 COPY custom_entrypoint.sh /etc/
 
 RUN chown www-data:www-data /etc/apache2/krb-container.keytab
@@ -20,7 +20,7 @@ RUN apt-get update; \
 
 RUN a2enmod ssl && service apache2 restart
 
-RUN kinit -kt /etc/apache2/krb-container.keytab HTTP/nextcloud.fgms.dev.com@FGMS.DEV.COM && klist
+# RUN kinit -kt /etc/apache2/krb-container.keytab HTTP/nextcloud.fgms.dev.com@FGMS.DEV.COM && klist
 
 CMD ["sh", "/etc/custom_entrypoint.sh"]
 
