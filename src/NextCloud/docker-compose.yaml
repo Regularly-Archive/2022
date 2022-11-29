@@ -1,4 +1,4 @@
-version: '3.5'
+﻿version: '3.5'
 
 services:
   nextcloud_db:
@@ -9,6 +9,8 @@ services:
       - 3306:3306
     volumes:
       - "./data/mysql/:/var/lib/mysql"
+    env_file:
+      - .env
     environment:
       - TZ=Asia/Shanghai
       - MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD
@@ -24,12 +26,21 @@ services:
       - 4433:443
     depends_on:
       - nextcloud_db
+    env_file:
+      - .env
     environment:
       - MYSQL_HOST=nextcloud_db
       - MYSQL_DATABASE=$MYSQL_DATABASE
       - MYSQL_USER=$MYSQL_USER
       - MYSQL_PASSWORD=$MYSQL_PASSWORD
+      - NEXTCLOUD_SERVER_NAME=$NEXTCLOUD_SERVER_NAME
+      - DOMAIN_NAME=$DOMAIN_NAME
+      - PHP_MEMORY_LIMIT=512M
+      - PHP_UPLOAD_LIMIT=512M
     volumes:
       - "./data/nextcloud:/var/www/html" #./data是数据位置，可以修改
       - "./docker-reference/000-default.conf:/etc/apache2/sites-available/000-default.conf"
+      - "./docker-reference/krb5.conf:/etc/krb5.conf"
+      - "./docker-reference/sources.list:/etc/apt/sources.list"
+      - "./docker-reference/krb-container.keytab:/etc/apache2/krb-container.keytab"
     restart: always
