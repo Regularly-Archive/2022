@@ -21,9 +21,16 @@ services:
   nextcloud_web:
     container_name: nextcloud_web
     build: ./
+    deploy:
+      resources:
+        limits:
+           cpus: '${CPU_LIMIT}'
+           memory: '${MEM_LIMIT}'
+      restart_policy:
+        condition: on-failure
     ports:
-      - 8061:80
-      - 4433:443
+      - ${NEXTCLOUD_SERVER_PORT_HTTP}:80
+      - ${NEXTCLOUD_SERVER_PORT_HTTPS}:443
     depends_on:
       - nextcloud_db
     env_file:
@@ -34,13 +41,14 @@ services:
       - MYSQL_USER=$MYSQL_USER
       - MYSQL_PASSWORD=$MYSQL_PASSWORD
       - NEXTCLOUD_SERVER_NAME=$NEXTCLOUD_SERVER_NAME
-      - DOMAIN_NAME=$DOMAIN_NAME
-      - PHP_MEMORY_LIMIT=512M
-      - PHP_UPLOAD_LIMIT=512M
+      - DOMAIN_SERVER_NAME=$DOMAIN_SERVER_NAME
+      - DOMAIN_SERVER_HOST=$DOMAIN_SERVER_HOST
+      - PHP_MEMORY_LIMIT=$PHP_MEMORY_LIMIT
+      - PHP_UPLOAD_LIMIT=$PHP_UPLOAD_LIMIT
     volumes:
-      - "./data/nextcloud:/var/www/html" #./data是数据位置，可以修改
+      - "./data/nextcloud:/var/www/html"
       - "./docker-reference/000-default.conf:/etc/apache2/sites-available/000-default.conf"
+      - "./docker-reference/certs/:/etc/certs/"
       - "./docker-reference/krb5.conf:/etc/krb5.conf"
-      - "./docker-reference/sources.list:/etc/apt/sources.list"
       - "./docker-reference/krb-container.keytab:/etc/apache2/krb-container.keytab"
     restart: always
