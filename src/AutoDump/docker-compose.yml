@@ -1,0 +1,17 @@
+version: '3.5'
+
+services:
+  autodump_console:
+    container_name: autodump_console
+    build: ./
+    environment:
+      - DOTNET_DbgEnableMiniDump=1
+      - DOTNET_DbgMiniDumpType=2
+      - DOTNET_DbgMiniDumpName=/usr/docker/dumps/app.dump
+      - DOTNET_CreateDumpDiagnostics=1
+      - DOTNET_EnableCrashReport=1
+      - DOTNET_CreateDumpVerboseDiagnostics=1
+      - DOMAIN_SERVER_HOST=$DOMAIN_SERVER_HOST
+      - DOTNET_CreateDumpLogToFile=
+    volumes:
+      - "./data/dumps:/usr/docker/dumps"

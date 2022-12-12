@@ -2,5 +2,8 @@ version: '3.5'
 
 services:
   crontab_in_docker:
-    container_name: crontab_in_docker
     build: ./
+    image: docker-crontab
+    env_file:
+      - .env
+      

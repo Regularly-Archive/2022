@@ -1,0 +1,2 @@
+deb https://mirrors.163.com/debian sid main contrib non-free
+deb-src https://mirrors.163.com/debian sid main contrib non-free

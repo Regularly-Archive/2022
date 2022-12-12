@@ -1,1 +1,2 @@
-echo [$(date)] "Hello" > /proc/1/fd/1
+#!/bin/sh
+echo [$(date)] "Hello" $Foo $Bar  > /proc/1/fd/1

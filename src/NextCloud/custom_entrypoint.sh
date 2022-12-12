@@ -1,17 +1,17 @@
-#!/bin/sh
-set -e
+﻿set -e
 
-#分配权限
+env >> /etc/default/locale
+
 chown www-data:www-data /etc/apache2/krb-container.keytab
+chown www-data:www-data /var/www/html/cron.php
 chmod 777 /etc/apache2/krb-container.keytab
 chmod +x /usr/crontab/renew.sh
 
-#初始化票据
 echo [$(date)] 'Initializing Kerberos ticket...'
 kinit -kt /etc/apache2/krb-container.keytab HTTP/$NEXTCLOUD_SERVER_NAME@$DOMAIN_SERVER_NAME
 
-#生成刷新票据的定时任务
 echo [$(date)] "Creating renew ticket cron job..."
+crontab -r
 export cronfile='/usr/crontab/cron.conf'
 renewTicket='*/10 * * * * /usr/crontab/renew.sh'
 echo "$renewTicket" | tee -a $cronfile

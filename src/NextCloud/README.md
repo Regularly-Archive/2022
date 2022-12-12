@@ -72,3 +72,24 @@ https://learn.microsoft.com/zh-cn/troubleshoot/developer/webapps/iis/www-authent
 安装后从 C:\Program Files (x86)\Microsoft Group Policy\Windows 10 October 2018 Update (1809) v2 复制 PolicyDefinitions 到域服务器的 
 
 edge://net-internals/#hsts
+
+
+下载扩展应用包：
+
+https://apps.nextcloud.com/apps/workflow_script/releases?platform=24
+
+解压内容至 /custom_apps/workflow_script 下
+
+执行脚本
+
+INSERT INTO nextcloud.oc_appconfig
+(appid, configkey, configvalue)
+VALUES('workflow_script', 'enabled', 'yes');
+INSERT INTO nextcloud.oc_appconfig
+(appid, configkey, configvalue)
+VALUES('workflow_script', 'installed_version', '1.9.0');
+INSERT INTO nextcloud.oc_appconfig
+(appid, configkey, configvalue)
+VALUES('workflow_script', 'types', 'filesystem');
+
+注意版本号一致，需要兼容 NextCloud 版本，其版本可以在 /config/config.php 中查看
