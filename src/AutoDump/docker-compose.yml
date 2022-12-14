@@ -14,4 +14,4 @@ services:
       - DOMAIN_SERVER_HOST=$DOMAIN_SERVER_HOST
       - DOTNET_CreateDumpLogToFile=
     volumes:
-      - "./data/dumps:/usr/docker/dumps"
+      - "./data/dumps/:/usr/docker/dumps/"

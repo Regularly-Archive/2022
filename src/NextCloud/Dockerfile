@@ -1,4 +1,4 @@
-FROM nextcloud
+FROM nextcloud:24
 
 COPY /docker-reference/crontab/* /usr/crontab/
 COPY /docker-reference/workflow/* /etc/workflow/
